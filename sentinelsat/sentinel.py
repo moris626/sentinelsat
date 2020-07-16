@@ -385,6 +385,7 @@ class SentinelAPI:
         self._last_query = query
         self.logger.debug("Sub-query: offset=%s, limit=%s", offset, limit)
 
+        url = self._format_url(order_by, limit, offset)
         # load query results (using get to support s5phub)
         url = '{}&q=({})'.format(url,query)
         response = self.session.get(
