@@ -385,15 +385,15 @@ class SentinelAPI:
         self._last_query = query
         self.logger.debug("Sub-query: offset=%s, limit=%s", offset, limit)
 
-        # load query results
-        url = self._format_url(order_by, limit, offset)
-        response = self.session.post(
+        # load query results (using get to support s5phub)
+        url = '{}&q=({})'.format(url,query)
+        response = self.session.get(
             url,
-            {"q": query},
             auth=self.session.auth,
-            headers={"Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"},
-            timeout=self.timeout,
+            headers={'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
+            timeout=self.timeout
         )
+
         _check_scihub_response(response, query_string=query)
 
         # store last status code (for testing)
@@ -536,8 +536,12 @@ class SentinelAPI:
 
         """
         # Check https://scihub.copernicus.eu/userguide/ODataAPI#Products_entity for more information
+        if url.startswith('https://coda.eumetsat.int/'):
+            self.logger.error("Could not verify whether product {} (CODA) is online".format(id))
+            return True
 
         url = urljoin(self.api_url, "odata/v1/Products('{}')/Online/$value".format(id))
+        
         r = self.session.get(url, auth=self.session.auth, timeout=self.timeout)
         _check_scihub_response(r)
         return r.json()
@@ -742,7 +746,10 @@ class SentinelAPI:
         # products from the LTA and use up our quota.
         downloaded_prods = {}
         for product_info in offline_prods.values():
-            path = join(directory_path, product_info["title"] + ".zip")
+            filename = product_info["title"] + (
+                ".nc" if product_info["title"].startswith("S5P") else ".zip"
+            )
+            path = join(directory_path, filename)
             if exists(path):
                 downloaded_prods[product_info["id"]] = product_info
             else:
