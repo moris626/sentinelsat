@@ -536,12 +536,13 @@ class SentinelAPI:
             True if online, False if in LTA
 
         """
+        url = urljoin(self.api_url, "odata/v1/Products('{}')/Online/$value".format(id))
+
         # Check https://scihub.copernicus.eu/userguide/ODataAPI#Products_entity for more information
         if url.startswith('https://coda.eumetsat.int/'):
             self.logger.error("Could not verify whether product {} (CODA) is online".format(id))
             return True
 
-        url = urljoin(self.api_url, "odata/v1/Products('{}')/Online/$value".format(id))
         
         r = self.session.get(url, auth=self.session.auth, timeout=self.timeout)
         _check_scihub_response(r)
