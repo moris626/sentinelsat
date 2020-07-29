@@ -11,7 +11,7 @@ with open("sentinelsat/__init__.py", encoding="utf-8") as f:
     version = re.search(r'__version__\s*=\s*"(\S+)"', f.read()).group(1)
 
 setup(
-    name="sentinelsat",
+    name="sentinelsat-meeo",
     version=version,
     description="Utility to search and download Copernicus Sentinel satellite images",
     long_description=long_description,

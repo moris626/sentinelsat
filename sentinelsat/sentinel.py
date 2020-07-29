@@ -579,7 +579,10 @@ class SentinelAPI:
             If the MD5 checksum does not match the checksum on the server.
         """
         product_info = self.get_product_odata(id)
-        path = join(directory_path, product_info["title"] + ".zip")
+        if product_info["title"].startswith("S5P"):
+            path = join(directory_path, product_info["title"] + ".nc")
+        else:
+            path = join(directory_path, product_info["title"] + ".zip")
         product_info["path"] = path
         product_info["downloaded_bytes"] = 0
 
